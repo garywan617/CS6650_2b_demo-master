@@ -9,8 +9,8 @@ aws configure
 ```
 
 ### Apply Infrastructure
-Before running infrastructure, make sure already created 
-(1) execution_role with AmazonECSTaskExecutionRolePolicy and CloudWatchLogsFullAccess 
+Before running infrastructure, make sure already created   
+(1) execution_role with AmazonECSTaskExecutionRolePolicy and CloudWatchLogsFullAccess  
 (2) task_role: don't need to have any specific policy here (not accessing other aws resource)
 for ECS 
 
@@ -46,7 +46,7 @@ aws ec2 describe-network-interfaces \
 
 Send some requests:
 ```
-curl http://<PUBLIC-IP-ADDRESS>:8080/v1/products/<productId>
+curl http://<PUBLIC-IP-ADDRESS>:8080/v1/products/<productId>  
 curl -X POST http://<PUBLIC-IP-ADDRESS>:8080/v1/products/<productId>/details -H "Content-Type: application/json" -d '{
   "product_id": <productId>,
   "sku": "SKU001",
@@ -61,7 +61,7 @@ curl -X POST http://<PUBLIC-IP-ADDRESS>:8080/v1/products/<productId>/details -H 
 ```
 terraform destroy -auto-approve
 ```
-```
+
 Delete the ECR manually on aws
-```
+
 
