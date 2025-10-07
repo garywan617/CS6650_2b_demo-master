@@ -10,9 +10,9 @@ aws configure
 
 ### Apply Infrastructure
 Before running infrastructure, make sure already created 
-(1) execution_role with AmazonECSTaskExecutionRolePolicy and CloudWatchLogsFullAccess
+(1) execution_role with AmazonECSTaskExecutionRolePolicy and CloudWatchLogsFullAccess 
 (2) task_role: don't need to have any specific policy here (not accessing other aws resource)
-for ECS
+for ECS 
 
 Already push the docker image onto ecr manually (The terraform will create an ecr), and specific the image url in the terraform ecs module.
 Since if I try to build the image using terraform docker provider, it keeps prompt missing cache (and I can't fix it with several attempting)
