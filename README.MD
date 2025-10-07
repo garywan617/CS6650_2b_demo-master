@@ -15,6 +15,16 @@ Before running infrastructure, make sure already created
 for ECS 
 
 Already push the docker image onto ecr manually (The terraform will create an ecr), and specific the image url in the terraform ecs module.
+```
+aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin <aws account id>.dkr.ecr.<aws region>.amazonaws.com
+```
+```
+docker tag ecr_service:latest <aws account id>.dkr.ecr.<aws region>.amazonaws.com/ecr_service:latest
+```
+```
+docker push <aws account id>.dkr.ecr.us-west-2.amazonaws.com/ecr_service:latest
+```
+
 Since if I try to build the image using terraform docker provider, it keeps prompt missing cache (and I can't fix it with several attempting)
 ```
 cd terraform
