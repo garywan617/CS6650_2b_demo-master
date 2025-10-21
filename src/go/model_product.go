@@ -10,23 +10,21 @@
 
 package openapi
 
+// ID, Name (searchable), Category (searchable), Description, Brand
 type Product struct {
 
 	// Unique identifier for the product
-	ProductId int32 `json:"product_id"`
+	ProductId int32 `json:"id"`
 
-	// Stock Keeping Unit - unique product code
-	Sku string `json:"sku"`
+	// Product name
+	ProductName string `json:"name"`
 
-	// Product manufacturer name
-	Manufacturer string `json:"manufacturer"`
+	// Product category
+	Category string `json:"category"`
 
-	// Product category identifier
-	CategoryId int32 `json:"category_id"`
+	// Product description
+	Description string `json:"description"`
 
-	// Product weight in grams
-	Weight int32 `json:"weight"`
-
-	// Additional identifier for product
-	SomeOtherId int32 `json:"some_other_id"`
+	// Product brand
+	Brand string `json:"brand"`
 }

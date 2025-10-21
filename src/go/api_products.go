@@ -11,27 +11,45 @@
 package openapi
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-// var products = make(map[int32]Product) // Product 對應你的 models.Product
-// //初始化三個測試物件
-// func init() {
-// 	products[1] = Product{1, "SKU-001", "Acme Corp", 10, 500, 1001}
-// 	products[2] = Product{2, "SKU-002", "Beta Inc", 20, 1200, 1002}
-// 	products[3] = Product{3, "SKU-003", "Gamma LLC", 30, 750, 1003}
-// }
 
 // 宣告並發安全的 map
 var products sync.Map
 
 func init() {
-	products.Store(int32(1), Product{1, "SKU-001", "Acme Corp", 10, 500, 1001})
-	products.Store(int32(2), Product{2, "SKU-002", "Beta Inc", 20, 1200, 1002})
-	products.Store(int32(3), Product{3, "SKU-003", "Gamma LLC", 30, 750, 1003})
+	brands := []string{"Alpha", "Beta", "Gamma", "Delta", "Epsilon"}
+	categories := []string{"Electronics", "Books", "Home", "Toys", "Sports"}
+	descriptions := []string{
+		"High quality product",
+		"Best seller item",
+		"Limited edition",
+		"New arrival",
+		"Popular choice",
+	}
+
+	// 生成 100,000 products
+	for i := 1; i <= 100_000; i++ {
+		brand := brands[i%len(brands)]
+		category := categories[i%len(categories)]
+		description := descriptions[i%len(descriptions)]
+
+		p := Product{
+			ProductId:   int32(i),
+			ProductName: fmt.Sprintf("Product %s %d", brand, i),
+			Category:    category,
+			Description: description,
+			Brand:       brand,
+		}
+
+		products.Store(p.ProductId, p)
+	}
 }
 
 type ProductsAPI struct {
@@ -130,4 +148,47 @@ func (api *ProductsAPI) GetProduct(c *gin.Context) {
 	}
 
 	c.IndentedJSON(200, product)
+}
+
+func (api *ProductsAPI) SearchProducts(c *gin.Context) {
+	query := strings.ToLower(c.Query("q"))
+	if query == "" {
+		c.JSON(400, gin.H{"error": "query parameter 'q' is required"})
+		return
+	}
+
+	maxCheck := 100
+	maxResults := 20
+	totalFound := 0
+	results := make([]Product, 0, maxResults)
+	count := 0
+
+	// 記錄開始時間
+	start := time.Now()
+
+	products.Range(func(key, value any) bool {
+		if count >= maxCheck {
+			return false // 停止迭代
+		}
+		count++
+
+		p := value.(Product)
+		if strings.Contains(strings.ToLower(p.ProductName), query) ||
+			strings.Contains(strings.ToLower(p.Category), query) {
+			totalFound++
+			if len(results) < maxResults {
+				results = append(results, p)
+			}
+		}
+
+		return true // 繼續迭代
+	})
+	// 計算搜尋耗時
+	elapsed := time.Since(start).Seconds()
+
+	c.JSON(200, gin.H{
+		"products":    results,
+		"total_found": totalFound,
+		"search_time": fmt.Sprintf("%.6fs", elapsed),
+	})
 }

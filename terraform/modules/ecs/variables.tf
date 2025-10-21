@@ -6,7 +6,7 @@ variable "service_name" {
 variable "image" {
   type        = string
   description = "ECR image URI (with tag)"
-  default = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service"
+  default = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service_hw6:1.2"
 }
 
 variable "container_port" {

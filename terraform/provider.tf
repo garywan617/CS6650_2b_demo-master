@@ -6,10 +6,10 @@ terraform {
       version = "~> 6.7.0"
       
     }
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = ">= 2.0.0"
-    }
+    # docker = {
+    #   source  = "kreuzwerker/docker"
+    #   version = ">= 2.0.0"
+    # }
   }
 }
 
@@ -24,12 +24,12 @@ provider "aws" {
 data "aws_ecr_authorization_token" "registry" {}
 
 # Configure Docker provider to authenticate against ECR automatically
-provider "docker" {
-  # host = "npipe:////./pipe/docker_engine"
-  host = "tcp://localhost:2375"
-  # registry_auth {
-  #   address  = data.aws_ecr_authorization_token.registry.proxy_endpoint
-  #   username = data.aws_ecr_authorization_token.registry.user_name
-  #   password = data.aws_ecr_authorization_token.registry.password
-  # }
-}
+# provider "docker" {
+#   # host = "npipe:////./pipe/docker_engine"
+#   host = "tcp://localhost:2375"
+#   # registry_auth {
+#   #   address  = data.aws_ecr_authorization_token.registry.proxy_endpoint
+#   #   username = data.aws_ecr_authorization_token.registry.user_name
+#   #   password = data.aws_ecr_authorization_token.registry.password
+#   # }
+# }
