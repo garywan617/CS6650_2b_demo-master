@@ -17,15 +17,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// var products = make(map[int32]Product) // Product 對應你的 models.Product
-// //初始化三個測試物件
+// var products = make(map[int32]Product) // Product
+//
 // func init() {
 // 	products[1] = Product{1, "SKU-001", "Acme Corp", 10, 500, 1001}
 // 	products[2] = Product{2, "SKU-002", "Beta Inc", 20, 1200, 1002}
 // 	products[3] = Product{3, "SKU-003", "Gamma LLC", 30, 750, 1003}
 // }
 
-// 宣告並發安全的 map
+// create a thread-safe map
 var products sync.Map
 
 func init() {
