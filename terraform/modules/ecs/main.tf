@@ -16,7 +16,7 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([{
     name      = "${var.service_name}-container"
-    image     = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service_hw6:1.3"
+    image     = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service_hw7:1.6"
     essential = true
 
     portMappings = [{
@@ -44,7 +44,7 @@ resource "aws_ecs_service" "this" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = var.subnet_ids
+    subnets         = var.private_subnet_ids
     security_groups = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
@@ -60,7 +60,7 @@ resource "aws_ecs_service" "this" {
 
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.service_name}-ecs-sg"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = var.vpc_id
   description = "Allow traffic from ALB"
 
   ingress {
@@ -76,6 +76,8 @@ resource "aws_security_group" "ecs_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+
 }
 
 
@@ -84,7 +86,7 @@ resource "aws_security_group" "ecs_sg" {
 resource "aws_security_group" "alb_sg" {
   name        = "${var.service_name}-alb-sg"
   description = "Allow HTTP traffic to ALB"
-  vpc_id      = data.aws_vpc.default.id  # 若是 default VPC，可改 data.aws_vpc.default.id
+  vpc_id      = var.vpc_id  # 若是 default VPC，可改 data.aws_vpc.default.id
 
   ingress {
     description = "Allow inbound HTTP traffic"
@@ -123,20 +125,84 @@ resource "aws_lb" "this" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = var.subnet_ids
+  subnets            = var.public_subnet_ids
 }
 
 
 data "aws_vpc" "default" {
   default = true
 }
+resource "aws_internet_gateway" "this" {
+  vpc_id = var.vpc_id
+
+  tags = {
+    Name = "${var.service_name}-igw"
+  }
+}
+
+resource "aws_route_table" "public" {
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.this.id
+  }
+
+  tags = {
+    Name = "${var.service_name}-public-rt"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  for_each = toset(var.public_subnet_ids)  # 從 network module 的 output 取得 public subnet IDs
+
+  subnet_id      = each.value
+  route_table_id = aws_route_table.public.id
+}
+
+resource "aws_eip" "nat" {
+  tags = {
+    Name = "${var.service_name}-nat-eip"
+  }
+}
+
+resource "aws_nat_gateway" "this" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = var.public_subnet_ids[0]  # 這裡放一個 public subnet
+  depends_on    = [aws_internet_gateway.this]
+
+  tags = {
+    Name = "${var.service_name}-nat"
+  }
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = var.vpc_id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.this.id
+  }
+
+  tags = {
+    Name = "${var.service_name}-private-rt"
+  }
+}
+
+resource "aws_route_table_association" "private" {
+  for_each = toset(var.private_subnet_ids)
+
+  subnet_id      = each.value
+  route_table_id = aws_route_table.private.id
+}
+
 
 # Target Group
 resource "aws_lb_target_group" "this" {
   name        = "${var.service_name}-tg"
   port        = var.container_port
   protocol    = "HTTP"
-  vpc_id      = data.aws_vpc.default.id  # 使用 default VPC
+  vpc_id      = var.vpc_id  # 使用 default VPC
   target_type = "ip"
 
   health_check {

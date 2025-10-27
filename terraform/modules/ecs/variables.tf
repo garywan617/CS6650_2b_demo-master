@@ -6,7 +6,7 @@ variable "service_name" {
 variable "image" {
   type        = string
   description = "ECR image URI (with tag)"
-  default = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service_hw6:1.2"
+  default = "211125691842.dkr.ecr.us-west-2.amazonaws.com/ecr_service_hw7:1.3"
 }
 
 variable "container_port" {
@@ -14,7 +14,21 @@ variable "container_port" {
   description = "Port your app listens on"
 }
 
+variable "vpc_id" {
+  type = string
+}
+
 variable "subnet_ids" {
+  type        = list(string)
+  description = "Subnets for FARGATE tasks"
+}
+
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "Subnets for FARGATE tasks"
+}
+
+variable "public_subnet_ids" {
   type        = list(string)
   description = "Subnets for FARGATE tasks"
 }

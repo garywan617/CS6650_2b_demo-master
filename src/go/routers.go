@@ -76,10 +76,25 @@ type ApiHandleFunctions struct {
 	ShoppingCartAPI ShoppingCartAPI
 	// Routes for the WarehouseAPI part of the API
 	WarehouseAPI WarehouseAPI
+
+	PostOrderSyncAPI PostOrderSyncAPI
+
+	PostOrderASyncAPI PostOrderASyncAPI
 }
 
 func getRoutes(handleFunctions ApiHandleFunctions) []Route {
 	return []Route{
+		{
+			"PostOrderSync",
+			http.MethodPost,
+			"/orders/sync", // endpoint
+			handleFunctions.PostOrderSyncAPI.PostOrderSync,
+		}, {
+			"PostOrderASync",
+			http.MethodPost,
+			"/orders/async", // endpoint
+			handleFunctions.PostOrderASyncAPI.PostOrderASync,
+		},
 		{
 			"SearchProducts",
 			http.MethodGet,

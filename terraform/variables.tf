@@ -7,7 +7,7 @@ variable "aws_region" {
 # ECR & ECS settings
 variable "ecr_repository_name" {
   type    = string
-  default = "ecr_service_hw6"
+  default = "ecr_service_hw7"
 }
 
 variable "service_name" {

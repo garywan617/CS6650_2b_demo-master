@@ -9,6 +9,7 @@ module "network" {
 module "ecr" {
   source          = "./modules/ecr"
   repository_name = var.ecr_repository_name
+    
 }
 
 module "logging" {
@@ -36,13 +37,22 @@ module "ecs" {
   service_name       = var.service_name
   image              = "${module.ecr.repository_url}:latest"
   container_port     = var.container_port
-  subnet_ids         = module.network.subnet_ids
+  vpc_id             = module.network.vpc_id
+  public_subnet_ids  = module.network.public_subnet_ids
+  private_subnet_ids = module.network.private_subnet_ids
+  subnet_ids         = module.network.private_subnet_ids
   security_group_ids = [module.network.security_group_id]
   execution_role_arn = data.aws_iam_role.task_exec_role.arn
   task_role_arn      = data.aws_iam_role.task_role.arn
   log_group_name     = module.logging.log_group_name
   ecs_count          = var.ecs_count
   region             = var.aws_region
+
+}
+
+module "messaging" {
+  source = "./modules/sns_sqs"
+
 }
 
 
